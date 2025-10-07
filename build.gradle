@@ -7,7 +7,6 @@ plugins {
     id 'jacoco'
     id 'jacoco-report-aggregation'
     id "tech.medivh.plugin.publisher" version "1.2.3"
-    id 'enterprises.iwakura.amber' version '1.0.0'
 }
 
 group 'enterprises.iwakura'
@@ -115,3 +114,7 @@ java {
 tasks.withType(JavaCompile) {
     options.release = 8
 }
+
+shadowJar.dependsOn javadocJar
+shadowJar.dependsOn sourcesJar
+shadowJar.dependsOn jar
