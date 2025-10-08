@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 
 import enterprises.iwakura.jdainteractables.GroupedInteractionEvent;
 import enterprises.iwakura.jdainteractables.Interaction;
-import enterprises.iwakura.jdainteractables.InteractiveListener;
+import enterprises.iwakura.jdainteractables.InteractableListener;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.User;
@@ -56,7 +56,7 @@ public class InteractiveModal extends Interactable {
      */
     public ModalCallbackAction replyModal(@NonNull IModalCallback modalCallback) {
         modalBuilder.setId(UUID.randomUUID().toString());
-        InteractiveListener.addInteractable(this);
+        InteractableListener.addInteractable(this);
         return modalCallback.replyModal(modalBuilder.build());
     }
 
@@ -69,7 +69,7 @@ public class InteractiveModal extends Interactable {
     public void process(GroupedInteractionEvent event) {
         if (isApplicable(null, event)) {
             modalClosedConsumer.accept(event.getModalInteractionEvent());
-            InteractiveListener.removeInteractable(this);
+            InteractableListener.removeInteractable(this);
         }
     }
 

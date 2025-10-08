@@ -23,9 +23,9 @@ public abstract class Interactable {
     protected final UUID id = UUID.randomUUID();
     protected final long createdAtMillis = System.currentTimeMillis();
     protected final List<Long> whitelistedUsers = new ArrayList<>();
-    protected final List<Runnable> expireCallbacks = new ArrayList<>();
+    protected final List<Runnable> expiryCallbacks = new ArrayList<>();
 
-    protected Duration expireDuration = Duration.ofMinutes(5);
+    protected Duration expiryDuration = Duration.ofMinutes(5);
 
     /**
      * Processes the interaction event
@@ -58,22 +58,22 @@ public abstract class Interactable {
      *
      * @param runnable The callback to run
      */
-    public void addOnExpireCallback(Runnable runnable) {
-        expireCallbacks.add(runnable);
+    public void addExpiryCallback(Runnable runnable) {
+        expiryCallbacks.add(runnable);
     }
 
     /**
      * Clears all expire callbacks
      */
-    public void clearOnExpireCallback() {
-        expireCallbacks.clear();
+    public void clearExpiryCallbacks() {
+        expiryCallbacks.clear();
     }
 
     /**
      * Called when the interactable expires
      */
-    public void runOnExpireCallbacks() {
-        for (Runnable runnable : expireCallbacks) {
+    public void runExpiryCallbacks() {
+        for (Runnable runnable : expiryCallbacks) {
             try {
                 runnable.run();
             } catch (Exception exception) {
@@ -88,6 +88,35 @@ public abstract class Interactable {
      * @return true if expired, false otherwise
      */
     public boolean isExpired() {
-        return System.currentTimeMillis() - createdAtMillis >= expireDuration.toMillis();
+        return System.currentTimeMillis() - createdAtMillis >= expiryDuration.toMillis();
+    }
+
+    /**
+     * Adds user to whitelist. If whitelist is empty, everyone can interact
+     *
+     * @param users Non-null {@link User} array
+     */
+    public void addUsersToWhitelist(User... users) {
+        for (User user : users) {
+            whitelistedUsers.add(user.getIdLong());
+        }
+    }
+
+    /**
+     * Removes user from whitelist
+     *
+     * @param users Non-null {@link User} array
+     */
+    public void removeUsersFromWhitelist(User... users) {
+        for (User user : users) {
+            whitelistedUsers.remove(user.getIdLong());
+        }
+    }
+
+    /**
+     * Clears the whitelist
+     */
+    public void clearWhitelist() {
+        whitelistedUsers.clear();
     }
 }

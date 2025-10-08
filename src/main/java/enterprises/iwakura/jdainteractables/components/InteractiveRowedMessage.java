@@ -3,7 +3,7 @@ package enterprises.iwakura.jdainteractables.components;
 import enterprises.iwakura.jdainteractables.exceptions.CannotAddInteractionException;
 import enterprises.iwakura.jdainteractables.GroupedInteractionEvent;
 import enterprises.iwakura.jdainteractables.Interaction;
-import enterprises.iwakura.jdainteractables.InteractiveListener;
+import enterprises.iwakura.jdainteractables.InteractableListener;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -31,12 +31,8 @@ import net.dv8tion.jda.api.requests.restaction.WebhookMessageEditAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
-import net.dv8tion.jda.internal.utils.tuple.ImmutablePair;
-import net.dv8tion.jda.internal.utils.tuple.MutablePair;
-import net.dv8tion.jda.internal.utils.tuple.Pair;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -268,7 +264,7 @@ public class InteractiveRowedMessage extends MessageInteractable {
             }
         }
 
-        InteractiveListener.addInteractable(this);
+        InteractableListener.addInteractable(this);
 
         return restAction;
     }
@@ -378,7 +374,9 @@ public class InteractiveRowedMessage extends MessageInteractable {
         public Builder addEntitySelectMenu(int actionRowIndex, String selectMenuPlaceholder, Collection<EntitySelectMenu.SelectTarget> selectTargets, Consumer<EntitySelectMenu.Builder> buildSelectMenu, Consumer<EntitySelectInteractionEvent> onInteracted) {
             EntitySelectMenu.Builder selectMenuBuilder = EntitySelectMenu.create(UUID.randomUUID().toString(), selectTargets);
             selectMenuBuilder.setPlaceholder(selectMenuPlaceholder);
-            buildSelectMenu.accept(selectMenuBuilder);
+            if (buildSelectMenu != null) {
+                buildSelectMenu.accept(selectMenuBuilder);
+            }
             addSelectMenu(actionRowIndex, selectMenuBuilder);
 
             if (onInteracted != null) {
@@ -400,6 +398,20 @@ public class InteractiveRowedMessage extends MessageInteractable {
          */
         public Builder addEntitySelectMenu(int actionRowIndex, String selectMenuPlaceholder, List<EntitySelectMenu.SelectTarget> selectTargets, Consumer<EntitySelectMenu.Builder> buildSelectMenu) {
             addEntitySelectMenu(actionRowIndex, selectMenuPlaceholder, selectTargets, buildSelectMenu, null);
+            return this;
+        }
+
+        /**
+         * Adds entity SelectMenu to the specified action row index
+         *
+         * @param actionRowIndex        Index of the action row
+         * @param selectMenuPlaceholder Placeholder for the SelectMenu
+         * @param selectTargets         SelectTargets
+         *
+         * @return Builder
+         */
+        public Builder addEntitySelectMenu(int actionRowIndex, String selectMenuPlaceholder, List<EntitySelectMenu.SelectTarget> selectTargets) {
+            addEntitySelectMenu(actionRowIndex, selectMenuPlaceholder, selectTargets, null, null);
             return this;
         }
 

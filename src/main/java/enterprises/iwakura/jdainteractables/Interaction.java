@@ -130,6 +130,39 @@ public final class Interaction {
     /**
      * Creates {@link Interaction} with Select Option, the value will be randomized
      *
+     * @param label     Select Option Label
+     * @param isDefault {@link SelectOption}'s {@link SelectOption#isDefault()}
+     * @return {@link Interaction} object
+     */
+    public static Interaction asSelectOption(@NonNull String label, boolean isDefault) {
+        return new Interaction(SelectOption.of(label, UUID.randomUUID().toString()).withDefault(isDefault));
+    }
+
+    /**
+     * Creates {@link Interaction} with Select Option, the value will be randomized
+     *
+     * @param label   Select Option Label
+     * @param emoji   Select Option Emoji
+     * @return {@link Interaction} object
+     */
+    public static Interaction asSelectOption(@NonNull String label, boolean isDefault, @NonNull Emoji emoji) {
+        return new Interaction(SelectOption.of(label, UUID.randomUUID().toString()).withDefault(isDefault).withEmoji(emoji));
+    }
+
+    /**
+     * Creates {@link Interaction} with Select Option, the value will be randomized
+     *
+     * @param label Select Option Label
+     * @param emoji Select Option Emoji
+     * @return {@link Interaction} object
+     */
+    public static Interaction asSelectOption(@NonNull String label, @NonNull Emoji emoji) {
+        return new Interaction(SelectOption.of(label, UUID.randomUUID().toString()).withEmoji(emoji));
+    }
+
+    /**
+     * Creates {@link Interaction} with Select Option, the value will be randomized
+     *
      * @param label       Select Option Label
      * @param description Select Option description
      * @return {@link Interaction} object

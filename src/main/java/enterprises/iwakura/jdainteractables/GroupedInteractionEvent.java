@@ -3,6 +3,7 @@ package enterprises.iwakura.jdainteractables;
 import lombok.Getter;
 import lombok.NonNull;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.SkuSnowflake;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -11,6 +12,7 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ComponentInteraction;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.requests.restaction.interactions.MessageEditCallbackAction;
 import net.dv8tion.jda.api.requests.restaction.interactions.ModalCallbackAction;
@@ -128,22 +130,6 @@ public final class GroupedInteractionEvent {
         return interaction.replyModal(modal);
     }
 
-    /**
-     * Replies to the interaction event with a premium required<br>
-     * Returns null if the interaction type is {@link InteractionType#MODAL_SUBMITTED} or {@link InteractionType#UNKNOWN}
-     *
-     * @return Nullable {@link PremiumRequiredCallbackAction}
-     */
-    public PremiumRequiredCallbackAction replyWithPremiumRequired() {
-        ComponentInteraction interaction = getComponentInteraction();
-
-        if (interaction == null) {
-            return null;
-        }
-
-        return interaction.replyWithPremiumRequired();
-    }
-
     /////////////
     // Getters //
     /////////////
@@ -174,18 +160,38 @@ public final class GroupedInteractionEvent {
         return InteractionType.UNKNOWN;
     }
 
+    /**
+     * Determines if this interaction event is of type {@link InteractionType#BUTTON_CLICK}
+     *
+     * @return true if this interaction event is of type {@link InteractionType#BUTTON_CLICK}
+     */
     public boolean isButtonInteraction() {
         return buttonInteractionEvent != null;
     }
 
+    /**
+     * Determines if this interaction event is of type {@link InteractionType#STRING_SELECT_MENU_OPTION_CLICK}
+     *
+     * @return true if this interaction event is of type {@link InteractionType#STRING_SELECT_MENU_OPTION_CLICK}
+     */
     public boolean isStringSelectMenuInteraction() {
         return stringSelectInteractionEvent != null;
     }
 
+    /**
+     * Determines if this interaction event is of type {@link InteractionType#ENTITY_SELECT_MENU_OPTION_CLICK}
+     *
+     * @return true if this interaction event is of type {@link InteractionType#ENTITY_SELECT_MENU_OPTION_CLICK}
+     */
     public boolean isEntitySelectMenuInteraction() {
         return entitySelectInteractionEvent != null;
     }
 
+    /**
+     * Determines if this interaction event is of type {@link InteractionType#MODAL_SUBMITTED}
+     *
+     * @return true if this interaction event is of type {@link InteractionType#MODAL_SUBMITTED}
+     */
     public boolean isModalInteraction() {
         return modalInteractionEvent != null;
     }

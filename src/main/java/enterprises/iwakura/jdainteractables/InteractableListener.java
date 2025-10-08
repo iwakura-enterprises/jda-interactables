@@ -16,7 +16,7 @@ import java.util.concurrent.Executors;
 /**
  * Register this class into your JDA/ShardManager to ensure everything related to interactive in this library will work.
  */
-public class InteractiveListener extends ListenerAdapter {
+public class InteractableListener extends ListenerAdapter {
 
     protected final static Object lock = new Object();
 
@@ -25,15 +25,15 @@ public class InteractiveListener extends ListenerAdapter {
     protected Executor eventProcessorExecutor = Executors.newCachedThreadPool();
 
     /**
-     * Creates new instance of {@link InteractiveListener}
+     * Creates new instance of {@link InteractableListener}
      */
-    public InteractiveListener() {
+    public InteractableListener() {
         expireCheckerTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
                 interactables.removeIf(interactable -> {
                     if (interactable.isExpired()) {
-                        interactable.runOnExpireCallbacks();
+                        interactable.runExpiryCallbacks();
                         return true;
                     } else {
                         return false;
