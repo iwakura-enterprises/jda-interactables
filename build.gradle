@@ -21,7 +21,12 @@ repositories {
 
 dependencies {
     // JDA
-    api 'net.dv8tion:JDA:5.6.1'
+    api 'net.dv8tion:JDA:6.0.0'
+
+    testImplementation 'net.dv8tion:JDA:6.0.0'
+    testImplementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1'
+    testImplementation 'org.apache.logging.log4j:log4j-api:2.23.1'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.23.1'
 
     // Lombok
     compileOnly 'org.projectlombok:lombok:1.18.+'
@@ -78,8 +83,8 @@ tasks.withType(JavaCompile) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 task publishCloseAndRelease() {
@@ -112,7 +117,7 @@ java {
 }
 
 tasks.withType(JavaCompile) {
-    options.release = 8
+    options.release = 21
 }
 
 shadowJar.dependsOn javadocJar

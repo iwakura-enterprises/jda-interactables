@@ -2,15 +2,22 @@ package enterprises.iwakura.jdainteractables.components;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Consumer;
 
-import enterprises.iwakura.jdainteractables.GroupedInteractionEvent;
+import enterprises.iwakura.jdainteractables.InteractableListener;
 import enterprises.iwakura.jdainteractables.Interaction;
+import enterprises.iwakura.jdainteractables.InteractionDeniedCallback;
+import enterprises.iwakura.jdainteractables.InteractionEventContext;
+import enterprises.iwakura.jdainteractables.InteractionHandler;
+import enterprises.iwakura.jdainteractables.InteractionHandler.Result;
+import enterprises.iwakura.jdainteractables.InteractionRule;
+import enterprises.iwakura.jdainteractables.UserContext;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.dv8tion.jda.api.entities.User;
 
 /**
  * Represents something that can be interacted with, like messages, modals, etc.
@@ -18,39 +25,104 @@ import net.dv8tion.jda.api.entities.User;
 @Slf4j
 @Getter
 @Setter
-public abstract class Interactable {
+public abstract class Interactable<T extends Interactable<?>> {
 
     protected final UUID id = UUID.randomUUID();
     protected final long createdAtMillis = System.currentTimeMillis();
-    protected final List<Long> whitelistedUsers = new ArrayList<>();
-    protected final List<Runnable> expiryCallbacks = new ArrayList<>();
+    protected final List<InteractionRule> interactionRuleList = Collections.synchronizedList(new ArrayList<>());
+    protected final List<Runnable> expiryCallbacks = Collections.synchronizedList(new ArrayList<>());
+    protected final List<InteractionDeniedCallback> interactionDeniedCallbacks = Collections.synchronizedList(new ArrayList<>());
 
     protected Duration expiryDuration = Duration.ofMinutes(5);
 
     /**
      * Processes the interaction event
      *
-     * @param interactionEvent The interaction event to process
+     * @param ctx The interaction event context
      */
-    public abstract void process(GroupedInteractionEvent interactionEvent);
+    public InteractionHandler.Result process(InteractionEventContext ctx) {
+        if (!canInteract(UserContext.createFrom(ctx))) {
+            runInteractionDeniedCallbacks(ctx);
+            return Result.IGNORE;
+        }
+        return InteractionHandler.Result.NOT_PROCESSED;
+    }
+
+    /**
+     * Registers this interactable with the {@link InteractableListener}
+     *
+     * @return this interactable
+     */
+    public T registerNow() {
+        InteractableListener.addInteractable(this);
+        return (T) this;
+    }
+
+    /**
+     * Returns a consumer that registers this interactable in the {@link InteractableListener} after the rest
+     * action is completed.
+     *
+     * @return A consumer that registers this interactable
+     */
+    public Consumer<? super Object> registerOnCompleted() {
+        return obj -> this.registerNow();
+    }
 
     /**
      * Checks if the event is applicable to this interactable
      *
      * @param interaction The interaction to check
-     * @param event       The event to check
+     * @param ctx         The event context to check
      * @return true if applicable, false otherwise
      */
-    public abstract boolean isApplicable(Interaction interaction, GroupedInteractionEvent event);
+    public boolean isApplicable(Interaction<?, ?> interaction, InteractionEventContext ctx) {
+        return interaction.getType() == ctx.getInteractionType() && canInteract(UserContext.createFrom(ctx));
+    }
 
     /**
-     * Determines if the user can interact with this interactable
+     * Adds an interaction rule to the interactable
      *
-     * @param user The user to check
+     * @param interactionRule The interaction rule to add
+     * @return The interactable itself for chaining
+     */
+    public T addInteractionRule(InteractionRule interactionRule) {
+        interactionRuleList.add(interactionRule);
+        return (T) this;
+    }
+
+    /**
+     * Checks if the user can interact with this interactable. If no interaction firewall functions are set, everyone
+     * can interact. If any function returns true, the user can interact. If no interaction rule returns allow or deny
+     * (e.g., all neutral), the user cannot interact.
+     * <p>
+     * If an interaction rule throws an exception, the error is logged and the user is disallowed from interacting.
+     *
+     * @param userContext The user context to check
      * @return true if the user can interact, false otherwise
      */
-    public boolean canUserInteract(User user) {
-        return whitelistedUsers.isEmpty() || whitelistedUsers.contains(user.getIdLong());
+    public boolean canInteract(UserContext userContext) {
+        if (interactionRuleList.isEmpty()) {
+            return true;
+        }
+
+        synchronized (interactionRuleList) {
+            for (InteractionRule interactionRule : interactionRuleList) {
+                try {
+                    InteractionRule.Result result = interactionRule.apply(userContext);
+                    if (result == InteractionRule.Result.ALLOW) {
+                        return true;
+                    } else if (result == InteractionRule.Result.DENY) {
+                        return false;
+                    }
+                } catch (Exception exception) {
+                    log.error("Error while applying interaction rule for interactable {}, disallowing interaction",
+                        id, exception);
+                    return false;
+                }
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -73,11 +145,46 @@ public abstract class Interactable {
      * Called when the interactable expires
      */
     public void runExpiryCallbacks() {
-        for (Runnable runnable : expiryCallbacks) {
-            try {
-                runnable.run();
-            } catch (Exception exception) {
-                log.error("Error while running onExpire runnable for interactable {}", id, exception);
+        synchronized (expiryCallbacks) {
+            for (Runnable runnable : expiryCallbacks) {
+                try {
+                    runnable.run();
+                } catch (Exception exception) {
+                    log.error("Error while running onExpire runnable for interactable {}", id, exception);
+                }
+            }
+        }
+    }
+
+    /**
+     * Adds a callback when an interaction is denied
+     *
+     * @param callback The callback to run
+     */
+    public void addInteractionDeniedCallback(InteractionDeniedCallback callback) {
+        interactionDeniedCallbacks.add(callback);
+    }
+
+    /**
+     * Clears all interaction denied callbacks
+     */
+    public void clearInteractionDeniedCallbacks() {
+        interactionDeniedCallbacks.clear();
+    }
+
+    /**
+     * Called when an interaction is denied
+     *
+     * @param ctx The interaction event context
+     */
+    protected void runInteractionDeniedCallbacks(InteractionEventContext ctx) {
+        synchronized (interactionDeniedCallbacks) {
+            for (Consumer<InteractionEventContext> consumer : interactionDeniedCallbacks) {
+                try {
+                    consumer.accept(ctx);
+                } catch (Exception exception) {
+                    log.error("Error while running onInteractionDenied consumer for interactable {}", id, exception);
+                }
             }
         }
     }
@@ -92,31 +199,9 @@ public abstract class Interactable {
     }
 
     /**
-     * Adds user to whitelist. If whitelist is empty, everyone can interact
-     *
-     * @param users Non-null {@link User} array
+     * Clears the interaction rules
      */
-    public void addUsersToWhitelist(User... users) {
-        for (User user : users) {
-            whitelistedUsers.add(user.getIdLong());
-        }
-    }
-
-    /**
-     * Removes user from whitelist
-     *
-     * @param users Non-null {@link User} array
-     */
-    public void removeUsersFromWhitelist(User... users) {
-        for (User user : users) {
-            whitelistedUsers.remove(user.getIdLong());
-        }
-    }
-
-    /**
-     * Clears the whitelist
-     */
-    public void clearWhitelist() {
-        whitelistedUsers.clear();
+    public void clearInteractionRules() {
+        interactionRuleList.clear();
     }
 }
