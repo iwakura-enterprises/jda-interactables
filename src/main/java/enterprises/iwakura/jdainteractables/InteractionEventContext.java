@@ -140,7 +140,7 @@ public class InteractionEventContext {
      * Returns {@link MessageChannelUnion} of interacted message.
      *
      * @return {@link MessageChannelUnion}. If the interaction type is not of {@link ComponentInteraction} or
-     * {@link ModalInteraction} (e.g. {@link InteractionType#UNKNOWN}), an {@link IllegalStateException} is thrown
+     * {@link ModalInteraction}, an {@link IllegalStateException} is thrown
      * @throws IllegalStateException if the interaction is not of {@link ComponentInteraction} or
      *                               {@link ModalInteraction}
      */
@@ -149,7 +149,7 @@ public class InteractionEventContext {
             return ((ComponentInteraction) interaction).getChannel();
         }
 
-        if (interaction instanceof ModalInteractionEvent) {
+        if (interaction instanceof ModalInteraction) {
             return ((ModalInteraction) interaction).getChannel();
         }
 

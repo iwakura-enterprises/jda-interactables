@@ -5,15 +5,34 @@ import java.util.function.Function;
 
 import enterprises.iwakura.jdainteractables.InteractionEventContext;
 import enterprises.iwakura.jdainteractables.InteractionHandler.Result;
+import enterprises.iwakura.jdainteractables.InteractionRule;
 import enterprises.iwakura.jdainteractables.InteractionType;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.modals.Modal;
 
+/**
+ * Represents an interactable modal. Allows you to create modals that can be processed through the interaction system.
+ * Use {@link #useModal(Modal.Builder)} to attach a modal builder to this interactable, which will automatically assign
+ * a random custom ID to the modal.
+ * <p>
+ * When the modal is submitted, the provided callback function will be executed to handle the modal interaction event.
+ * </p><p>
+ * Interactable modals ignore {@link InteractionRule}s as they can be submitted only by the user who opened the modal.
+ * </p><p>
+ * Interactable modals can also have an expiry time, after which the modal will no longer be interactable. The default
+ * expiry time is 5 minutes, but you can change it.
+ * </p><p>
+ * You can also add expiry callbacks using {@link #addExpiryCallback(Runnable)} which will be called when the modal
+ * expires.
+ * </p>
+ */
 @RequiredArgsConstructor
 public class InteractableModal extends Interactable<InteractableModal> {
 
-    protected final String id = UUID.randomUUID().toString();
+    /**
+     * Function to call when the modal is closed
+     */
     protected final Function<ModalInteractionEvent, Result> onModalClosed;
 
     /**
@@ -24,7 +43,7 @@ public class InteractableModal extends Interactable<InteractableModal> {
      * @return This interactable modal
      */
     public InteractableModal useModal(Modal.Builder modalBuilder) {
-        modalBuilder.setId(id);
+        modalBuilder.setId(this.id.toString());
         return this;
     }
 

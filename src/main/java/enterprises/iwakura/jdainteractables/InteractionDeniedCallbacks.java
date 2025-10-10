@@ -25,6 +25,7 @@ public class InteractionDeniedCallbacks {
     /**
      * Defers the reply with specified content and ephemeral set to true.
      *
+     * @param content The content to send
      * @return The interaction denied callback
      */
     public static InteractionDeniedCallback deferReplyEphemeral(String content) {
@@ -34,6 +35,7 @@ public class InteractionDeniedCallbacks {
     /**
      * Defers the reply with specified embed and ephemeral set to true.
      *
+     * @param embeds The embeds to send
      * @return The interaction denied callback
      */
     public static InteractionDeniedCallback deferReplyEphemeral(MessageEmbed... embeds) {

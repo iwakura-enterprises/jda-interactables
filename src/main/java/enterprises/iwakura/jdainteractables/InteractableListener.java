@@ -61,12 +61,13 @@ public class InteractableListener extends ListenerAdapter {
 
     /**
      * Removes interactable from the list
-     * </p>
+     * <p>
      * <b>HEY YOU!</b> Yes, you! Why are you using this method? Usually, JDA Interactables removes the interactable
      * when it's expired or when the interaction is processed with {@link Result#REMOVE}.
-     * <br>
+     * </p><p>
      * If you are using this method, please make sure you know what you are doing, as the call could lead to
      * {@link ConcurrentModificationException}.
+     * </p>
      * <p>This is left here for advanced use cases.</p>
      *
      * @param interactable {@link Interactable}

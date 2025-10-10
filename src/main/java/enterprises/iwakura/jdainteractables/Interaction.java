@@ -169,8 +169,9 @@ public final class Interaction<T, E> {
     /**
      * Creates {@link Interaction} with Select Option, the value will be randomized
      *
-     * @param label Select Option Label
-     * @param emoji Select Option Emoji
+     * @param label     Select Option Label
+     * @param emoji     Select Option Emoji
+     * @param isDefault {@link SelectOption}'s {@link SelectOption#isDefault()}
      * @return {@link Interaction} object
      */
     public static Interaction<SelectOption, StringSelectInteractionEvent> asSelectOption(@NonNull String label,

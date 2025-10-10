@@ -4,19 +4,40 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import enterprises.iwakura.jdainteractables.Interaction;
+import enterprises.iwakura.jdainteractables.InteractionDeniedCallback;
 import enterprises.iwakura.jdainteractables.InteractionEventContext;
 import enterprises.iwakura.jdainteractables.InteractionHandler;
 import enterprises.iwakura.jdainteractables.InteractionHandler.Result;
+import enterprises.iwakura.jdainteractables.InteractionRule;
 import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.components.selections.SelectOption;
+import net.dv8tion.jda.api.requests.RestAction;
 
 /**
- * Represents an interactable message
+ * Represents an interactable message. Allows you to create interactable buttons and select menus using
+ * {@link #addInteraction(Interaction, InteractionHandler)} which can be added into your message. Upon sending your
+ * message, you must register the message as interactable by calling {@link #registerNow()} or by using
+ * {@link #registerOnCompleted()} when calling {@link RestAction#queue(Consumer)}.
+ * <p>
+ * Interactable messages can have {@link InteractionRule}s to determine who can
+ * interact with the message. By default, everyone can interact. You may as well add a {@link InteractionDeniedCallback}
+ * to handle denied interactions using {@link #addInteractionDeniedCallback(InteractionDeniedCallback)}.
+ * </p><p>
+ * Interactable messages can also have an expiry time, after which the message will no longer be interactable. The
+ * default expiry time is 5 minutes, but you can change it.
+ * </p><p>
+ * You can also add expiry callbacks using {@link #addExpiryCallback(Runnable)} which will be called when the message
+ * expires.
+ * </p>
  */
 public class InteractableMessage extends Interactable<InteractableMessage> {
 
+    /**
+     * Map of interactions and their handlers
+     */
     protected final Map<Interaction<?, ?>, InteractionHandler<?>> interactions =
         Collections.synchronizedMap(new HashMap<>());
 
@@ -26,6 +47,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
      * @param interaction        The interaction to add
      * @param interactionHandler The handler to handle the interaction
      * @param <T>                The type of the component returned by the interaction
+     * @param <E>                The type of the interaction event
      * @return The component associated with the interaction
      * @throws IllegalArgumentException if the interaction already exists in this interactable message
      */

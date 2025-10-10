@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Represents something that can be interacted with, like messages, modals, etc.
+ *
+ * @param <T> The type of the interactable itself, useful for method chaining
  */
 @Slf4j
 @Getter
@@ -31,7 +33,8 @@ public abstract class Interactable<T extends Interactable<?>> {
     protected final long createdAtMillis = System.currentTimeMillis();
     protected final List<InteractionRule> interactionRuleList = Collections.synchronizedList(new ArrayList<>());
     protected final List<Runnable> expiryCallbacks = Collections.synchronizedList(new ArrayList<>());
-    protected final List<InteractionDeniedCallback> interactionDeniedCallbacks = Collections.synchronizedList(new ArrayList<>());
+    protected final List<InteractionDeniedCallback> interactionDeniedCallbacks = Collections.synchronizedList(
+        new ArrayList<>());
 
     protected Duration expiryDuration = Duration.ofMinutes(5);
 
@@ -39,6 +42,7 @@ public abstract class Interactable<T extends Interactable<?>> {
      * Processes the interaction event
      *
      * @param ctx The interaction event context
+     * @return The result of the interaction processing
      */
     public InteractionHandler.Result process(InteractionEventContext ctx) {
         if (!canInteract(UserContext.createFrom(ctx))) {
@@ -59,8 +63,8 @@ public abstract class Interactable<T extends Interactable<?>> {
     }
 
     /**
-     * Returns a consumer that registers this interactable in the {@link InteractableListener} after the rest
-     * action is completed.
+     * Returns a consumer that registers this interactable in the {@link InteractableListener} after the rest action is
+     * completed.
      *
      * @return A consumer that registers this interactable
      */
