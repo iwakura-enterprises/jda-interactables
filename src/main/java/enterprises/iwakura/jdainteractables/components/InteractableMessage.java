@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import enterprises.iwakura.jdainteractables.Interaction;
 import enterprises.iwakura.jdainteractables.InteractionDeniedCallback;
@@ -22,9 +23,9 @@ import net.dv8tion.jda.api.requests.RestAction;
  * message, you must register the message as interactable by calling {@link #registerNow()} or by using
  * {@link #registerOnCompleted()} when calling {@link RestAction#queue(Consumer)}.
  * <p>
- * Interactable messages can have {@link InteractionRule}s to determine who can
- * interact with the message. By default, everyone can interact. You may as well add a {@link InteractionDeniedCallback}
- * to handle denied interactions using {@link #addInteractionDeniedCallback(InteractionDeniedCallback)}.
+ * Interactable messages can have {@link InteractionRule}s to determine who can interact with the message. By default,
+ * everyone can interact. You may as well add a {@link InteractionDeniedCallback} to handle denied interactions using
+ * {@link #addInteractionDeniedCallback(InteractionDeniedCallback)}.
  * </p><p>
  * Interactable messages can also have an expiry time, after which the message will no longer be interactable. The
  * default expiry time is 5 minutes, but you can change it.
@@ -38,7 +39,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
     /**
      * Map of interactions and their handlers
      */
-    protected final Map<Interaction<?, ?>, InteractionHandler<?>> interactions =
+    protected final Map<Interaction<?, ?>, InteractionHandler<InteractableMessage, ?>> interactions =
         Collections.synchronizedMap(new HashMap<>());
 
     /**
@@ -53,9 +54,28 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
      */
     public <T, E> T addInteraction(
         Interaction<T, E> interaction,
-        InteractionHandler<E> interactionHandler
+        InteractionHandler<InteractableMessage, E> interactionHandler
     ) {
         interactions.put(interaction, interactionHandler);
+        return interaction.getComponent();
+    }
+
+    /**
+     * Adds an interaction to the interactable message
+     *
+     * @param interaction        The interaction to add
+     * @param interactionHandler The handler to handle the interaction
+     * @param <T>                The type of the component returned by the interaction
+     * @param <E>                The type of the interaction event
+     * @return The component associated with the interaction
+     * @throws IllegalArgumentException if the interaction already exists in this interactable message
+     */
+    @SuppressWarnings("unchecked")
+    public <T, E> T addInteraction(
+        Interaction<T, E> interaction,
+        Function<E, Result> interactionHandler
+    ) {
+        interactions.put(interaction, (msg, event) -> interactionHandler.apply((E) event));
         return interaction.getComponent();
     }
 
@@ -76,7 +96,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
 
             if (isApplicable(interaction, ctx)) {
                 // #getInteraction() => Event
-                result = (Result) handler.apply(ctx.getInteraction());
+                result = (Result) handler.apply(this, ctx.getInteraction());
                 // No breaking - allows multiple interactions to be processed
             }
         }

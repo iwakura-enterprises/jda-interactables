@@ -1,8 +1,9 @@
 package enterprises.iwakura.jdainteractables;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import enterprises.iwakura.jdainteractables.InteractionHandler.Result;
+import enterprises.iwakura.jdainteractables.components.Interactable;
 import enterprises.iwakura.jdainteractables.components.InteractableMessage;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -10,9 +11,11 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 /**
  * Interaction handler that processes an interaction event invoked by User on an interactable component.
  *
- * @param <E> Type of the interaction event, e.g. {@link ButtonInteractionEvent}, {@link StringSelectInteractionEvent}, etc.
+ * @param <T> Type of the interactable component, e.g. {@link InteractableMessage}
+ * @param <E> Type of the interaction event, e.g. {@link ButtonInteractionEvent}, {@link StringSelectInteractionEvent},
+ *            etc.
  */
-public interface InteractionHandler<E> extends Function<E, Result> {
+public interface InteractionHandler<T extends Interactable<?>, E> extends BiFunction<T, E, Result> {
 
     enum Result {
         /**
@@ -33,8 +36,8 @@ public interface InteractionHandler<E> extends Function<E, Result> {
         NOT_PROCESSED,
 
         /**
-         * Ignores the interaction, preventing other interactables from being processed. This is used internally. Please,
-         * use {@link #KEEP} or {@link #REMOVE} instead.
+         * Ignores the interaction, preventing other interactables from being processed. This is used internally.
+         * Please, use {@link #KEEP} or {@link #REMOVE} instead.
          */
         IGNORE;
     }

@@ -14,7 +14,6 @@ import enterprises.iwakura.jdainteractables.InteractionEventContext;
 import enterprises.iwakura.jdainteractables.InteractionHandler;
 import enterprises.iwakura.jdainteractables.InteractionHandler.Result;
 import enterprises.iwakura.jdainteractables.InteractionRule;
-import enterprises.iwakura.jdainteractables.UserContext;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,7 @@ public abstract class Interactable<T extends Interactable<?>> {
      * @return The result of the interaction processing
      */
     public InteractionHandler.Result process(InteractionEventContext ctx) {
-        if (!canInteract(UserContext.createFrom(ctx))) {
+        if (!canInteract(ctx)) {
             runInteractionDeniedCallbacks(ctx);
             return Result.IGNORE;
         }
@@ -80,7 +79,7 @@ public abstract class Interactable<T extends Interactable<?>> {
      * @return true if applicable, false otherwise
      */
     public boolean isApplicable(Interaction<?, ?> interaction, InteractionEventContext ctx) {
-        return interaction.getType() == ctx.getInteractionType() && canInteract(UserContext.createFrom(ctx));
+        return interaction.getType() == ctx.getInteractionType() && canInteract(ctx);
     }
 
     /**
@@ -101,10 +100,10 @@ public abstract class Interactable<T extends Interactable<?>> {
      * <p>
      * If an interaction rule throws an exception, the error is logged and the user is disallowed from interacting.
      *
-     * @param userContext The user context to check
+     * @param ctx Interaction event context
      * @return true if the user can interact, false otherwise
      */
-    public boolean canInteract(UserContext userContext) {
+    public boolean canInteract(InteractionEventContext ctx) {
         if (interactionRuleList.isEmpty()) {
             return true;
         }
@@ -112,7 +111,7 @@ public abstract class Interactable<T extends Interactable<?>> {
         synchronized (interactionRuleList) {
             for (InteractionRule interactionRule : interactionRuleList) {
                 try {
-                    InteractionRule.Result result = interactionRule.apply(userContext);
+                    InteractionRule.Result result = interactionRule.apply(ctx);
                     if (result == InteractionRule.Result.ALLOW) {
                         return true;
                     } else if (result == InteractionRule.Result.DENY) {
