@@ -318,6 +318,30 @@ public final class Interaction<T, E> {
     }
 
     /**
+     * Creates {@link Interaction} with Entity Select Menu, the ID will be randomized
+     *
+     * @param placeholder Placeholder text when nothing is selected
+     * @param minValues   Minimum number of selections
+     * @param maxValues   Maximum number of selections
+     * @param type        The type of entities that can be selected
+     * @param types       Additional types of entities that can be selected
+     * @return {@link Interaction} object
+     */
+    public static Interaction<EntitySelectMenu, EntitySelectInteractionEvent> asEntitySelectMenu(
+        @NonNull String placeholder,
+        int minValues,
+        int maxValues,
+        @NonNull SelectTarget type,
+        @NonNull SelectTarget... types
+    ) {
+        return new Interaction<>(EntitySelectMenu.create(UUID.randomUUID().toString(), type, types)
+            .setPlaceholder(placeholder)
+            .setMinValues(minValues)
+            .setMaxValues(maxValues)
+            .build());
+    }
+
+    /**
      * Determines if {@link Interaction} is Button
      *
      * @return true if {@link Interaction} is Button

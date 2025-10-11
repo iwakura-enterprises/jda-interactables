@@ -127,6 +127,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
                         if (clickedButtonId != null && interactionButtonId != null) {
                             return clickedButtonId.equals(interactionButtonId);
                         }
+                        break;
                     }
                     case STRING_SELECT_MENU: {
                         if (interaction.isSelectOption()) {
@@ -148,6 +149,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
                                 .getCustomId();
                             return interactionId.equals(selectedId);
                         }
+                        break;
                     }
                     case ENTITY_SELECT_MENU: {
                         String interactionId = interaction.getEntitySelectMenu().getCustomId();
