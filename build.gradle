@@ -82,8 +82,8 @@ tasks.withType(JavaCompile) {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 task publishCloseAndRelease() {
@@ -116,7 +116,7 @@ java {
 }
 
 tasks.withType(JavaCompile) {
-    options.release = 21
+    options.release = 8
 }
 
 shadowJar.dependsOn javadocJar

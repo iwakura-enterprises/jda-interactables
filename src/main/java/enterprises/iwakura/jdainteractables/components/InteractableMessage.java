@@ -88,7 +88,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
 
         Result result = Result.NOT_PROCESSED;
 
-        for (var entry : interactions.entrySet()) {
+        for (Map.Entry<Interaction<?, ?>, InteractionHandler<InteractableMessage, ?>> entry : interactions.entrySet()) {
             // Interaction<Component, Event>
             Interaction interaction = entry.getKey();
             // InteractionHandler<Event>
@@ -117,7 +117,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
         if (super.isApplicable(interaction, ctx)) {
             if (!ctx.isModalInteraction()) {
                 switch (ctx.getInteractionType()) {
-                    case BUTTON_CLICK -> {
+                    case BUTTON_CLICK: {
                         Button clickedButton = ctx.getButtonInteractionEvent().getButton();
                         Button interactionButton = interaction.getButton();
 
@@ -128,14 +128,14 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
                             return clickedButtonId.equals(interactionButtonId);
                         }
                     }
-                    case STRING_SELECT_MENU -> {
+                    case STRING_SELECT_MENU: {
                         if (interaction.isSelectOption()) {
                             // Check for selected values in the interaction
                             String interactionValue = interaction.getSelectOption().getValue();
                             List<SelectOption> selectOptions = ctx.getStringSelectInteractionEvent()
                                 .getInteraction()
                                 .getSelectedOptions();
-                            for (var selectedOption : selectOptions) {
+                            for (SelectOption selectedOption : selectOptions) {
                                 if (interactionValue.equals(selectedOption.getValue())) {
                                     return true;
                                 }
@@ -149,7 +149,7 @@ public class InteractableMessage extends Interactable<InteractableMessage> {
                             return interactionId.equals(selectedId);
                         }
                     }
-                    case ENTITY_SELECT_MENU -> {
+                    case ENTITY_SELECT_MENU: {
                         String interactionId = interaction.getEntitySelectMenu().getCustomId();
                         String selectedId = ctx.getEntitySelectInteractionEvent()
                             .getInteraction()

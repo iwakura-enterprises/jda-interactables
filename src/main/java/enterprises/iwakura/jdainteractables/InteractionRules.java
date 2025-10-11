@@ -1,5 +1,6 @@
 package enterprises.iwakura.jdainteractables;
 
+import java.util.Arrays;
 import java.util.List;
 
 import enterprises.iwakura.jdainteractables.InteractionRule.Result;
@@ -21,7 +22,7 @@ public class InteractionRules {
      */
     public static InteractionRule allowUsers(List<User> users) {
         return user -> {
-            for (var u : users) {
+            for (User u : users) {
                 if (u.getIdLong() == user.getUser().getIdLong()) {
                     return Result.ALLOW;
                 }
@@ -37,7 +38,7 @@ public class InteractionRules {
      * @return Firewall rule
      */
     public static InteractionRule allowUsers(User... users) {
-        return allowUsers(List.of(users));
+        return allowUsers(Arrays.asList(users));
     }
 
     /**
@@ -48,7 +49,7 @@ public class InteractionRules {
      */
     public static InteractionRule denyUsers(List<User> users) {
         return user -> {
-            for (var u : users) {
+            for (User u : users) {
                 if (u.getIdLong() == user.getUser().getIdLong()) {
                     return Result.DENY;
                 }
@@ -64,7 +65,7 @@ public class InteractionRules {
      * @return Firewall rule
      */
     public static InteractionRule denyUsers(User... users) {
-        return denyUsers(List.of(users));
+        return denyUsers(Arrays.asList(users));
     }
 
     /**
@@ -78,7 +79,7 @@ public class InteractionRules {
             if (user.getGuild() == null || user.getMember() == null) {
                 return Result.NEUTRAL;
             }
-            for (var r : roles) {
+            for (Role r : roles) {
                 if (user.getMember().getRoles().contains(r)) {
                     return Result.ALLOW;
                 }
@@ -94,7 +95,7 @@ public class InteractionRules {
      * @return Firewall rule
      */
     public static InteractionRule allowRoles(Role... roles) {
-        return allowRoles(List.of(roles));
+        return allowRoles(Arrays.asList(roles));
     }
 
     /**
@@ -108,7 +109,7 @@ public class InteractionRules {
             if (user.getGuild() == null || user.getMember() == null) {
                 return Result.NEUTRAL;
             }
-            for (var r : roles) {
+            for (Role r : roles) {
                 if (user.getMember().getRoles().contains(r)) {
                     return Result.DENY;
                 }
@@ -124,6 +125,6 @@ public class InteractionRules {
      * @return Firewall rule
      */
     public static InteractionRule denyRoles(Role... roles) {
-        return denyRoles(List.of(roles));
+        return denyRoles(Arrays.asList(roles));
     }
 }

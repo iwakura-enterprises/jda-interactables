@@ -50,8 +50,8 @@ public class InteractableModal extends Interactable<InteractableModal> {
     @Override
     public Result process(InteractionEventContext ctx) {
         if (ctx.getInteractionType() == InteractionType.MODAL_SUBMITTED) {
-            var modalEvent = ctx.getModalInteractionEvent();
-            if (modalEvent.getModalId().equals(id)) {
+            ModalInteractionEvent modalEvent = ctx.getModalInteractionEvent();
+            if (modalEvent.getModalId().equals(id.toString())) {
                 return onModalClosed.apply(modalEvent);
             }
         }
